@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BatteryDoctor.iml" filepath="$PROJECT_DIR$/BatteryDoctor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/BatteryDoctory.iml" filepath="$PROJECT_DIR$/BatteryDoctory.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

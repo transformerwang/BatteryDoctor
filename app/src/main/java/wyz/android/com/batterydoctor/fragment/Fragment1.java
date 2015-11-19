@@ -201,6 +201,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+
                 int level = intent.getIntExtra("level", 0);//剩余容量
                 int scale = intent.getIntExtra("scale", 100);//电池最大值
                 int vol = intent.getIntExtra("voltage", 0);//电压

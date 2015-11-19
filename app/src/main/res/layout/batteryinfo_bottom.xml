@@ -8,28 +8,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/img_bt_wifi"
-        android:src="@mipmap/wifi"
-        android:layout_weight="1"
-        />
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/img_bt_bluetooth"
-        android:src="@mipmap/net"
+        android:src="@mipmap/wifioff"
         android:layout_weight="1"
         />
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/img_bt_network"
-        android:src="@mipmap/blueetooth"
+        android:src="@mipmap/netoff"
+        android:layout_weight="1"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/img_bt_bluetooth"
+        android:src="@mipmap/bluetoothoff"
         android:layout_weight="1"
         />
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/img_bt_gps"
-        android:src="@mipmap/gps"
+        android:src="@mipmap/gpsoff"
         android:layout_weight="1"
         />
 </LinearLayout>
