@@ -1,12 +1,19 @@
 package wyz.android.com.batterydoctor.fragment;
 
 
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
@@ -30,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +79,8 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     @Bind(R.id.graph)
     GraphView graph;
     private BatteryBroadcastReceiver batteryBroadcastReceiver;
+    private WifiManager wifiManager = null;
+    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
     @Nullable
@@ -124,6 +134,9 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinY(0);
         graph.getViewport().setMaxY(100);
+        DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
+        series.resetData(mArrayPoint);
+        graph.addSeries(series);
 
         imgBtWifi.setOnClickListener(this);
         imgBtBluetooth.setOnClickListener(this);
@@ -137,6 +150,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         mCircleView.setBarColor(getResources().getColor(R.color.beginColor), getResources().getColor(R.color.centerColor), getResources().getColor(R.color.endColor));
         mCircleView.setTextMode(TextMode.PERCENT);
 
+        wifiManager = (WifiManager)getActivity().getSystemService(Context.WIFI_SERVICE);
 
         batteryBroadcastReceiver = new BatteryBroadcastReceiver();
         getActivity().registerReceiver(batteryBroadcastReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -179,16 +193,47 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         switch (v.getId())
         {
             case R.id.img_bt_wifi:
-                Toast.makeText(getActivity(),"Wifi",Toast.LENGTH_SHORT).show();
+                int status = wifiManager.getWifiState();
+                if (status == 1) {
+                    wifiManager.setWifiEnabled(true);
+                    imgBtWifi.setImageResource(R.mipmap.wifi);
+                    Toast.makeText(getActivity(),"Start Wifi",Toast.LENGTH_SHORT).show();
+                }else if(status == 3){
+                    wifiManager.setWifiEnabled(false);
+                    imgBtWifi.setImageResource(R.mipmap.wifioff);
+                    Toast.makeText(getActivity(),"Close Wifi",Toast.LENGTH_SHORT).show();
+                }
+                // Toast.makeText(getActivity(),"Wifi",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.img_bt_bluetooth:
-                Toast.makeText(getActivity(),"Bluetooth",Toast.LENGTH_SHORT).show();
+                if (bluetoothAdapter == null) {
+                    Toast.makeText(getActivity(),"No bluetooth device found!",Toast.LENGTH_SHORT).show();
+                } else if (bluetoothAdapter.isEnabled()) {
+                    bluetoothAdapter.disable();
+                    imgBtBluetooth.setImageResource(R.mipmap.bluetoothoff);
+                    Toast.makeText(getActivity(),"Stop Bluetooth",Toast.LENGTH_SHORT).show();
+                } else if (!bluetoothAdapter.isEnabled()){
+                    bluetoothAdapter.enable();
+                    imgBtBluetooth.setImageResource(R.mipmap.blueetooth);
+                    Toast.makeText(getActivity(),"Start Bluetooth",Toast.LENGTH_SHORT).show();
+                }
+                // Toast.makeText(getActivity(),"Bluetooth",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.img_bt_gps:
-                Toast.makeText(getActivity(),"Gps",Toast.LENGTH_SHORT).show();
+                initGPS();
+                //Toast.makeText(getActivity(),"Gps",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.img_bt_network:
-                Toast.makeText(getActivity(),"Net",Toast.LENGTH_SHORT).show();
+                if(!getMobileDataState(getActivity(),null)){
+                    setMobileData(getActivity(), true);
+                    imgBtNetwork.setImageResource(R.mipmap.net);
+                    Toast.makeText(getActivity(),"Start Network",Toast.LENGTH_SHORT).show();
+                }else {
+                    setMobileData(getActivity(), false);
+                    imgBtNetwork.setImageResource(R.mipmap.netoff);
+                    Toast.makeText(getActivity(),"Close Network",Toast.LENGTH_SHORT).show();
+                }
+                //Toast.makeText(getActivity(),"Net",Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -234,19 +279,25 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public void setPower(int currentPower) {
         Time time = new Time();
         time.setToNow();
-        DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
-        Log.e("x", String.valueOf(dataPoint.getX()));
-        Log.e("y", String.valueOf(dataPoint.getY()));
         Double current = (double) time.hour + (double) time.minute;
+        if(time.minute % 10 == 0)
+        {
+            DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
+            Log.e("x", String.valueOf(dataPoint.getX()));
+            Log.e("y", String.valueOf(dataPoint.getY()));
+            mList.add(dataPoint);
+            mListNew.add(dataPoint);
+            DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
+            series.resetData(mArrayPoint);
+            graph.addSeries(series);
+        }
+
+
         if (mList.size() > 0 && current < mList.get(mList.size() - 1).getX()) {
             getActivity().deleteFile("DataList4.txt");
             Log.e("delete", "deleteTXT");
         }
-        mList.add(dataPoint);
-        mListNew.add(dataPoint);
-        DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
-        series.resetData(mArrayPoint);
-        graph.addSeries(series);
+
     }
 
     public void setStatus(int status) {
@@ -294,6 +345,168 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
                 break;
         }
         textHealth.setText(healthString);
+    }
+
+    //GPS
+    private void initGPS() {
+        final LocationManager locationManager = (LocationManager) getActivity()
+                .getSystemService(Context.LOCATION_SERVICE);
+        // 判断GPS模块是否开启，如果没有则开启
+        if (!locationManager
+                .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+
+            Toast.makeText(getActivity(), "Please turn on GPS",
+                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+            dialog.setMessage("Please turn on GPS");
+            dialog.setPositiveButton("Yes",
+                    new android.content.DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+
+                            // 转到手机设置界面，用户设置GPS
+                            Intent intent = new Intent(
+                                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivityForResult(intent, 0); // 设置完成后返回到原来的界面
+                        }
+                    });
+            dialog.setNeutralButton("Cancel", new android.content.DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    arg0.dismiss();
+                }
+            });
+            dialog.show();
+        } else {
+
+            // 弹出Toast
+            Toast.makeText(getActivity(), "Please turn off GPS",
+                    Toast.LENGTH_LONG).show();
+//          // 弹出对话框
+//          new AlertDialog.Builder(this).setMessage("GPS is ready")
+//                  .setPositiveButton("OK", null).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+            dialog.setMessage("Please turn off GPS");
+            dialog.setPositiveButton("Yes",
+                    new android.content.DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface arg0, int arg1) {
+
+                            // 转到手机设置界面，用户设置GPS
+                            Intent intent = new Intent(
+                                    Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivityForResult(intent, 0); // 设置完成后返回到原来的界面
+                        }
+                    });
+            dialog.setNeutralButton("Cancel", new android.content.DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    arg0.dismiss();
+                }
+            });
+            dialog.show();
+        }
+
+    }
+    public static void setMobileData(Context pContext, boolean pBoolean) {
+
+        try {
+
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) pContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            Class ownerClass = mConnectivityManager.getClass();
+
+            Class[] argsClass = new Class[1];
+            argsClass[0] = boolean.class;
+
+            Method method = ownerClass.getMethod("setMobileDataEnabled", argsClass);
+
+            method.invoke(mConnectivityManager, pBoolean);
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.out.println("Setting error: " + e.toString());
+        }
+    }
+
+    public static boolean getMobileDataState(Context pContext, Object[] arg) {
+
+        try {
+
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) pContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            Class ownerClass = mConnectivityManager.getClass();
+
+            Class[] argsClass = null;
+            if (arg != null) {
+                argsClass = new Class[1];
+                argsClass[0] = arg.getClass();
+            }
+
+            Method method = ownerClass.getMethod("getMobileDataEnabled", argsClass);
+
+            Boolean isOpen = (Boolean) method.invoke(mConnectivityManager, arg);
+
+            return isOpen;
+
+        } catch (Exception e) {
+            // TODO: handle exception
+
+            System.out.println("Error");
+            return false;
+        }
+    }
+    @Override
+    public void onResume() {
+        final LocationManager locationManager = (LocationManager) getActivity()
+                .getSystemService(Context.LOCATION_SERVICE);
+        super.onResume();
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            imgBtGps.setImageResource(R.mipmap.gpsoff);
+        }else{
+            imgBtGps.setImageResource(R.mipmap.gps);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        final LocationManager locationManager = (LocationManager) getActivity()
+                .getSystemService(Context.LOCATION_SERVICE);
+        int status = wifiManager.getWifiState();
+        super.onStart();
+
+        //check gps
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            imgBtGps.setImageResource(R.mipmap.gpsoff);
+        }else{
+            imgBtGps.setImageResource(R.mipmap.gps);
+        }
+
+        //check wifi
+        if (status == 1) {
+            imgBtWifi.setImageResource(R.mipmap.wifioff);
+        }else if(status == 3){
+            imgBtWifi.setImageResource(R.mipmap.wifi);
+        }
+
+        //check bluetooth
+        if (bluetoothAdapter.isEnabled()) {
+            imgBtBluetooth.setImageResource(R.mipmap.blueetooth);
+        } else if (!bluetoothAdapter.isEnabled()){
+            imgBtBluetooth.setImageResource(R.mipmap.bluetoothoff);
+        }
+
+        //check network
+        if(!getMobileDataState(getActivity(), null)){
+            imgBtNetwork.setImageResource(R.mipmap.netoff);
+        }else {
+            imgBtNetwork.setImageResource(R.mipmap.net);
+        }
     }
 
 }

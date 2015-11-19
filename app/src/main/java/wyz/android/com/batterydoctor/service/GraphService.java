@@ -36,16 +36,21 @@ public class GraphService extends Service {
                 int mCurrentPower = level * 100 / scale;
                 Time time = new Time();
                 time.setToNow();
+                if(time.minute % 10 ==0)
+                {
+                    DataPoint dataPoint = new DataPoint((double)time.hour + (double)time.minute/100,mCurrentPower);
+                    Log.e("xs",String.valueOf(dataPoint.getX()));
+                    Log.e("ys",String.valueOf(dataPoint.getY()));
+                    mList.add(dataPoint);
+                }
                 Double current = (double) time.hour + (double) time.minute;
                 if(mList.size() > 0 && current < mList.get(mList.size()-1).getX())
                 {
                     deleteFile("DataList4.txt");
                     Log.e("delete", "deleteTXT");
                 }
-                DataPoint dataPoint = new DataPoint((double)time.hour + (double)time.minute/100,mCurrentPower);
-                Log.e("xs",String.valueOf(dataPoint.getX()));
-                Log.e("ys",String.valueOf(dataPoint.getY()));
-                mList.add(dataPoint);
+
+
 //                if(callBackListener!=null) {
 //                    callBackListener.callBack(mList);
 //                }
