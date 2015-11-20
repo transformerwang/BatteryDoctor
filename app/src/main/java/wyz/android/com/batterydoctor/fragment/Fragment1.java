@@ -40,6 +40,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,12 +85,12 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getActivity().stopService(new Intent(getActivity(), GraphService.class));
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         try {
-            File file = new File(getActivity().getFilesDir(),"DataList4.txt");
+            File file = new File(getActivity().getApplicationContext().getFilesDir(),"DataList4.txt");
             //Log.e("b", getActivity().getFilesDir().toString());
             if(!file.exists())
             {
@@ -114,7 +115,11 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment1, container, false);
         ButterKnife.bind(this, view);
         return view;
@@ -124,6 +129,11 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String date = formatter.format(new java.util.Date());
+        graph.setTitle(date);
+        graph.setTitleTextSize(40);
+        graph.setTitleColor(R.color.colorAccent);
         graph.getGridLabelRenderer().setNumHorizontalLabels(13);
         graph.getGridLabelRenderer().setNumVerticalLabels(11);
         graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {

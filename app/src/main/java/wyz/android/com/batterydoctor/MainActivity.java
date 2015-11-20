@@ -1,5 +1,6 @@
 package wyz.android.com.batterydoctor;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,7 @@ import wyz.android.com.batterydoctor.adapter.TabFragmentPagerAdapter;
 import wyz.android.com.batterydoctor.fragment.Fragment1;
 import wyz.android.com.batterydoctor.fragment.Fragment2;
 import wyz.android.com.batterydoctor.fragment.Fragment3;
+import wyz.android.com.batterydoctor.service.GraphService;
 
 public class MainActivity extends AppCompatActivity {
     private List<Fragment> mList = new ArrayList<>();
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        stopService(new Intent(this, GraphService.class));
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

@@ -90,7 +90,7 @@ public class GraphService extends Service {
         super.onDestroy();
         unregisterReceiver(batteryChangedReceiver);
         try {
-            FileOutputStream fos = openFileOutput("DataList4", MODE_APPEND);
+            FileOutputStream fos = openFileOutput("DataList4.txt", MODE_APPEND);
             OutputStreamWriter osw = new OutputStreamWriter(fos,"UTF-8");
             BufferedWriter bw = new BufferedWriter(osw);
             for (DataPoint dataPoint : mList) {
