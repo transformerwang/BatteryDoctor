@@ -13,6 +13,7 @@ import android.util.Log;
 import com.jjoe64.graphview.series.DataPoint;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -46,8 +47,10 @@ public class GraphService extends Service {
                 Double current = (double) time.hour + (double) time.minute;
                 if(mList.size() > 0 && current < mList.get(mList.size()-1).getX())
                 {
-                    deleteFile("DataList4.txt");
-                    Log.e("delete", "deleteTXT");
+                    File file = new File(getFilesDir(),"DataList4.txt");
+                    if(file.exists()) {
+                        file.delete();
+                    }
                 }
 
 
