@@ -33,6 +33,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
@@ -88,6 +89,13 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         getActivity().stopService(new Intent(getActivity(), GraphService.class));
         try {
+            File file = new File(getActivity().getFilesDir(),"DataList4.txt");
+            //Log.e("b", getActivity().getFilesDir().toString());
+            if(!file.exists())
+            {
+                Log.e("a","创建成功！");
+                file.createNewFile();
+            }
             FileInputStream fis = getActivity().openFileInput("DataList4.txt");
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
             BufferedReader br = new BufferedReader(isr);
@@ -294,8 +302,10 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
 
 
         if (mList.size() > 0 && current < mList.get(mList.size() - 1).getX()) {
-            getActivity().deleteFile("DataList4.txt");
-            Log.e("delete", "deleteTXT");
+            File file = new File(getActivity().getFilesDir(),"DataList4.txt");
+            if(file.exists()) {
+                file.delete();
+            }
         }
 
     }

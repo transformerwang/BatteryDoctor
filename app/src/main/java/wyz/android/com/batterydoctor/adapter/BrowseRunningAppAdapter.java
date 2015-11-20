@@ -28,7 +28,6 @@ public class BrowseRunningAppAdapter extends BaseAdapter {
 
     public int getCount() {
         // TODO Auto-generated method stub
-        System.out.println("size" + mlistAppInfo.size());
         return mlistAppInfo.size();
     }
     @Override
@@ -43,7 +42,6 @@ public class BrowseRunningAppAdapter extends BaseAdapter {
     }
     @Override
     public View getView(int position, View convertview, ViewGroup arg2) {
-        System.out.println("getView at " + position);
         View view = null;
         ViewHolder holder = null;
         if (convertview == null || convertview.getTag() == null) {
