@@ -9,10 +9,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +27,28 @@ import wyz.android.com.batterydoctor.service.GraphService;
 
 public class MainActivity extends AppCompatActivity {
     private List<Fragment> mList = new ArrayList<>();
+    private boolean mBool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        stopService(new Intent(this, GraphService.class));
+
+        stopService(new Intent(this,GraphService.class));
+        startService(new Intent(this, GraphService.class));
+
+
+        File file = new File(getApplicationContext().getFilesDir(),"DataList4.txt");
+        if(!file.exists())
+        {
+            Log.e("a", "Create DataList4.txt！");
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -75,4 +94,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
