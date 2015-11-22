@@ -45,7 +45,6 @@ import at.grabner.circleprogress.TextMode;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import wyz.android.com.batterydoctor.R;
-import wyz.android.com.batterydoctor.model.Battery;
 
 /**
  * Created by wangyuzhe on 11/15/15.
@@ -61,9 +60,6 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     ImageView imgBtBluetooth;
     @Bind(R.id.img_bt_network)
     ImageView imgBtNetwork;
-    private List<DataPoint> mList = new ArrayList<>();
-    private List<DataPoint> mListNew = new ArrayList<>();
-    LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     @Bind(R.id.circle_view)
     CircleProgressView mCircleView;
     @Bind(R.id.text_temp)
@@ -76,26 +72,19 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     ImageView imgBtGps;
     @Bind(R.id.graph)
     GraphView graph;
-//    private BatteryBroadcastReceiver batteryBroadcastReceiver;
+    private List<DataPoint> mList = new ArrayList<>();
+    LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+    private BatteryBroadcastReceiver batteryBroadcastReceiver;
     private WifiManager wifiManager = null;
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String statusString;
     private String BatteryStatus;
-    private BatteryReceiver mBatteryReceiver;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         try {
-//            File file = new File(getActivity().getApplicationContext().getFilesDir(),"DataList4.txt");
-//            //Log.e("b", getActivity().getFilesDir().toString());
-//            if(!file.exists())
-//            {
-//                Log.e("a","创建成功！");
-//                file.createNewFile();
-//            }
             FileInputStream fis = getActivity().openFileInput("DataList4.txt");
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
             BufferedReader br = new BufferedReader(isr);
@@ -114,11 +103,6 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        mBatteryReceiver = new BatteryReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.android.wyz.batterydoctor.Receiver");
-        getActivity().registerReceiver(mBatteryReceiver,intentFilter);
     }
 
     @Nullable
@@ -133,7 +117,12 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-
+        mCircleView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String date = formatter.format(new java.util.Date());
         graph.setTitle(date);
@@ -175,41 +164,15 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
 
         wifiManager = (WifiManager)getActivity().getSystemService(Context.WIFI_SERVICE);
 
-//        batteryBroadcastReceiver = new BatteryBroadcastReceiver();
-//        getActivity().registerReceiver(batteryBroadcastReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        batteryBroadcastReceiver = new BatteryBroadcastReceiver();
+        getActivity().registerReceiver(batteryBroadcastReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
     }
 
     @Override
     public void onDestroy() {
-        getActivity().unregisterReceiver(mBatteryReceiver);
-//        getActivity().unregisterReceiver(batteryBroadcastReceiver);
-//        getActivity().startService(new Intent(getActivity(), GraphService.class));
-//
-//        try {
-//            FileOutputStream fos = getActivity().openFileOutput("DataList4.txt", getActivity().MODE_APPEND);
-//            OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
-//            BufferedWriter bw = new BufferedWriter(osw);
-////            Time time = new Time();
-////            bw.write(time.yearDay);
-//            for (DataPoint dataPoint : mListNew) {
-//                bw.write(String.valueOf(dataPoint.getX()) + "," + String.valueOf(dataPoint.getY()) + "\t\n");
-//                Log.d("xd", String.valueOf(dataPoint.getX()));
-//                Log.d("yd", String.valueOf(dataPoint.getY()));
-//            }
-//            bw.close();
-//            osw.close();
-//            fos.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        getActivity().unregisterReceiver(batteryBroadcastReceiver);
         ButterKnife.unbind(this);
         super.onDestroy();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
     }
 
     @Override
@@ -263,69 +226,55 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     }
 
 
-//    public class BatteryBroadcastReceiver extends BroadcastReceiver {
-//
-//        private int mCurrentPower;
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-//                int level = intent.getIntExtra("level", 0);//剩余容量
-//                int scale = intent.getIntExtra("scale", 100);//电池最大值
-//                int vol = intent.getIntExtra("voltage", 0);//电压
-//                int temp = intent.getIntExtra("temperature", 0);//温度
-//                int status = intent.getIntExtra("status", 0);//状态
-//                int health = intent.getIntExtra("health", 0);//健康
-//                int plugged = intent.getIntExtra("plugged", 0);//充电方式
-//                String tech = intent.getStringExtra("technology");//电池品牌
-//                mCurrentPower = level * 100 / scale;
-//                mCircleView.setValue(mCurrentPower);
-//                mCircleView.setOnTouchListener(new View.OnTouchListener() {
-//                    @Override
-//                    public boolean onTouch(View v, MotionEvent event) {
-//                        return true;
-//                    }
-//                });
-//                DecimalFormat df = new DecimalFormat("0.0");
-//                textTemp.setText(df.format(temp * 0.1) + "℃");
-//                textVol.setText(String.valueOf(df.format(vol * 0.001))+ "V");
-//                textTech.setText(tech);
-//
-//                setPower(level * 100 / scale);
-//                setStatus(status);
-//                setHealth(health);
-//                charginMethod(plugged);
-//
+    public class BatteryBroadcastReceiver extends BroadcastReceiver {
 
-//            }
-//
-//        }
-//
-//    }
+        private int mCurrentPower;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                int level = intent.getIntExtra("level", 0);//剩余容量
+                int scale = intent.getIntExtra("scale", 100);//电池最大值
+                int vol = intent.getIntExtra("voltage", 0);//电压
+                int temp = intent.getIntExtra("temperature", 0);//温度
+                int status = intent.getIntExtra("status", 0);//状态
+                int health = intent.getIntExtra("health", 0);//健康
+                int plugged = intent.getIntExtra("plugged", 0);//充电方式
+                String tech = intent.getStringExtra("technology");//电池品牌
+                mCurrentPower = level * 100 / scale;
+                mCircleView.setValue(mCurrentPower);
+                mCircleView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return true;
+                    }
+                });
+                DecimalFormat df = new DecimalFormat("0.0");
+                textTemp.setText(df.format(temp * 0.1) + "℃");
+                textVol.setText(String.valueOf(df.format(vol * 0.001))+ "V");
+                textTech.setText(tech);
+
+                setPower(mCurrentPower);
+                setStatus(status);
+                setHealth(health);
+                charginMethod(plugged);
+
+            }
+
+        }
+
+    }
 
     public void setPower(int currentPower) {
         Time time = new Time();
         time.setToNow();
-        Double current = (double) time.hour + (double) time.minute;
-//        if(time.minute % 5 == 0)
-//        {
-            DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
-            Log.e("x", String.valueOf(dataPoint.getX()));
-            Log.e("y", String.valueOf(dataPoint.getY()));
-            mList.add(dataPoint);
-            DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
-            series.resetData(mArrayPoint);
-            graph.addSeries(series);
-//        }
-
-
-//        if (mList.size() > 0 && current < mList.get(mList.size() - 1).getX()) {
-//            File file = new File(getActivity().getFilesDir(),"DataList4.txt");
-//            if(file.exists()) {
-//                file.delete();
-//            }
-//        }
-
+        DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
+        Log.e("x", String.valueOf(dataPoint.getX()));
+        Log.e("y", String.valueOf(dataPoint.getY()));
+        mList.add(dataPoint);
+        DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
+        series.resetData(mArrayPoint);
+        graph.addSeries(series);
     }
 
     public void setStatus(int status) {
@@ -537,8 +486,6 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         }
     }
 
-
-
     public void charginMethod(int plugged)
     {
         switch (plugged) {
@@ -551,29 +498,5 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         }
     }
 
-    public class BatteryReceiver extends BroadcastReceiver
-    {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Battery battery = (Battery) intent.getSerializableExtra("battery");
-            mCircleView.setValue(battery.getmCurrent());
-                mCircleView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return true;
-                    }
-                });
-                DecimalFormat df = new DecimalFormat("0.0");
-                textTemp.setText(df.format(battery.getmTemp() * 0.1) + "℃");
-                textVol.setText(String.valueOf(df.format(battery.getmVol() * 0.001))+ "V");
-                textTech.setText(battery.getmTech());
-
-                setPower(battery.getmCurrent());
-                setStatus(battery.getmStatus());
-                setHealth(battery.getmHealth());
-                charginMethod(battery.getmPlugged());
-        }
-    }
 
 }

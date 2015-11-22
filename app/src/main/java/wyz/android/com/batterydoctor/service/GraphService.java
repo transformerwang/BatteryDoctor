@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.os.BatteryManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -20,23 +19,17 @@ import android.util.Log;
 import com.jjoe64.graphview.series.DataPoint;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import wyz.android.com.batterydoctor.MainActivity;
 import wyz.android.com.batterydoctor.R;
-import wyz.android.com.batterydoctor.model.Battery;
 
 /**
  * Created by wangyuzhe on 11/16/15.
  */
 public class GraphService extends Service {
-    private List<DataPoint> mList = new ArrayList<>();
-    private Intent serviceIntent;
     private PendingIntent resultPendingIntent;
     private NotificationManager notificationManager;
     private int level;
@@ -48,18 +41,10 @@ public class GraphService extends Service {
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 level = intent.getIntExtra("level", 0);//剩余容量
                 scale = intent.getIntExtra("scale", 100);//电池最大值
-                int vol = intent.getIntExtra("voltage", 0);//电压
                 int temp = intent.getIntExtra("temperature", 0);//温度
                 int status = intent.getIntExtra("status", 0);//状态
-                int health = intent.getIntExtra("health", 0);//健康
                 int plugged = intent.getIntExtra("plugged", 0);//充电方式
-                String tech = intent.getStringExtra("technology");//电池品牌
                 int mCurrentPower = level * 100 / scale;
-                Battery battery = new Battery(mCurrentPower,vol,temp,status,health,plugged,tech);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("battery",battery);
-                serviceIntent.putExtras(bundle);
-                sendBroadcast(serviceIntent);//发送电池信息给activity
                 DecimalFormat df = new DecimalFormat("0.0");
                 notification(df.format(temp * 0.1), mCurrentPower, setStatus(status), charginMethod(plugged));
                 Time time = new Time();
@@ -73,28 +58,23 @@ public class GraphService extends Service {
                     FileOutputStream fos = openFileOutput("DataList4.txt", MODE_APPEND);
                     OutputStreamWriter osw = new OutputStreamWriter(fos,"UTF-8");
                     BufferedWriter bw = new BufferedWriter(osw);
-//                    for (DataPoint dataPoint : mList) {
-                        bw.write(String.valueOf(dataPoint.getX()) + "," + String.valueOf(dataPoint.getY()) + "\t\n");
-//                        Log.i("x", String.valueOf(dataPoint.getX()));
-//                        Log.i("y",String.valueOf(dataPoint.getY()));
-//                    }
+                    bw.write(String.valueOf(dataPoint.getX()) + "," + String.valueOf(dataPoint.getY()) + "\t\n");
                     bw.close();
                     osw.close();
                     fos.close();
-                } catch (Exception e) {
+                    }
+                catch (Exception e) {
                     e.printStackTrace();
                 }
-//                    mList.add(dataPoint);
 
+//                Double current = (double) time.hour + (double) time.minute;
+//                if(mList.size() > 0 && current < mList.get(mList.size()-1).getX())
+//                {
+//                    File file = new File(getFilesDir(),"DataList4.txt");
+//                    if(file.exists()) {
+//                        file.delete();
+//                    }
 //                }
-                Double current = (double) time.hour + (double) time.minute;
-                if(mList.size() > 0 && current < mList.get(mList.size()-1).getX())
-                {
-                    File file = new File(getFilesDir(),"DataList4.txt");
-                    if(file.exists()) {
-                        file.delete();
-                    }
-                }
 
             }
         }
@@ -104,13 +84,11 @@ public class GraphService extends Service {
     @Override
     public void onCreate() {
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        registerReceiver(batteryChangedReceiver,intentFilter);
-        serviceIntent = new Intent("com.android.wyz.batterydoctor.Receiver");
+        registerReceiver(batteryChangedReceiver,intentFilter);//注册电池服务
 
         Intent intent = new Intent(this, MainActivity.class);
-        resultPendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        resultPendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);//通知栏
         notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
         super.onCreate();
 
     }
@@ -118,7 +96,6 @@ public class GraphService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-//        return new LocalBinder();
         return null;
     }
 
