@@ -111,7 +111,7 @@ public class GraphService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentTitle("Battery Level: " + String.valueOf(power) + "%")
                 .setContentText(statusCharge + "(" + statusMethod + ")/" + temp + "℃")
-                .setSmallIcon(R.mipmap.gps)
+                .setSmallIcon(R.drawable.notify)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.wifioff))
                 .setContentIntent(resultPendingIntent);
         Notification notification = builder.build();

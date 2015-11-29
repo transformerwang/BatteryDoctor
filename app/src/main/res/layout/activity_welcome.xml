@@ -8,7 +8,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/welcome"/>
     <su.levenetc.android.textsurface.TextSurface
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="400dp"
+        android:layout_height="300dp"
         android:id="@+id/text_surface"/>
 </LinearLayout>
