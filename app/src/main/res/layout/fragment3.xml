@@ -3,7 +3,8 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical">
     <TextView android:id="@+id/tvInfo" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:text="AppLable : "></TextView>
+        android:textColor="@color/colorAccent"
+        android:layout_height="wrap_content" android:text="AppLable : "/>
     <ListView android:id="@+id/listviewApp" android:layout_width="fill_parent"
         android:layout_height="fill_parent">
     </ListView>

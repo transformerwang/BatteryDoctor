@@ -56,19 +56,16 @@ public class BrowseRunningAppAdapter extends BaseAdapter {
         RunningAppInfo appInfo = (RunningAppInfo) getItem(position);
         holder.appIcon.setImageDrawable(appInfo.getAppIcon());
         holder.tvAppLabel.setText(appInfo.getAppLabel());
-        holder.tvPkgName.setText(appInfo.getPkgName());
         return view;
     }
 
     class ViewHolder {
         ImageView appIcon;
         TextView tvAppLabel;
-        TextView tvPkgName;
 
         public ViewHolder(View view) {
             this.appIcon = (ImageView) view.findViewById(R.id.imgApp);
             this.tvAppLabel = (TextView) view.findViewById(R.id.tvAppLabel);
-            this.tvPkgName = (TextView) view.findViewById(R.id.tvPkgName);
         }
     }
 

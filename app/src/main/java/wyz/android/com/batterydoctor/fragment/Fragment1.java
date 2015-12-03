@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -36,7 +35,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -246,26 +244,6 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
                 }
                 Log.e("bright", String.valueOf(BrightnessTools.getScreenBrightness(getActivity())));
                 num++;
-//                if(!getMobileDataState(getActivity(),null)){
-//                    setMobileData(getActivity(), true);
-//                    imgBtNetwork.setImageResource(R.mipmap.net);
-//                    Toast.makeText(getActivity(),"Start Network",Toast.LENGTH_SHORT).show();
-//                }else {
-//                    setMobileData(getActivity(), false);
-//                    imgBtNetwork.setImageResource(R.mipmap.netoff);
-//                    Toast.makeText(getActivity(),"Close Network",Toast.LENGTH_SHORT).show();
-//                }
-                //Toast.makeText(getActivity(),"Net",Toast.LENGTH_SHORT).show();
-//                if(num == 0)
-//                {
-//                    BrightnessTools.startAutoBrightness(getActivity());
-//                }
-//                if(BrightnessTools.isAutoBrightness(getActivity().getContentResolver()))
-//                {
-//                    BrightnessTools.stopAutoBrightness(getActivity());
-//                }
-//                BrightnessTools.setBrightness(getActivity(),10);
-//                BrightnessTools.saveBrightness(getActivity().getContentResolver(),10);
                 break;
             case R.id.battery_bt:
                 Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -444,55 +422,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         }
 
     }
-    public static void setMobileData(Context pContext, boolean pBoolean) {
 
-        try {
-
-            ConnectivityManager mConnectivityManager = (ConnectivityManager) pContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            Class ownerClass = mConnectivityManager.getClass();
-
-            Class[] argsClass = new Class[1];
-            argsClass[0] = boolean.class;
-
-            Method method = ownerClass.getMethod("setMobileDataEnabled", argsClass);
-
-            method.invoke(mConnectivityManager, pBoolean);
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            System.out.println("Setting error: " + e.toString());
-        }
-    }
-
-    public static boolean getMobileDataState(Context pContext, Object[] arg) {
-
-        try {
-
-            ConnectivityManager mConnectivityManager = (ConnectivityManager) pContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            Class ownerClass = mConnectivityManager.getClass();
-
-            Class[] argsClass = null;
-            if (arg != null) {
-                argsClass = new Class[1];
-                argsClass[0] = arg.getClass();
-            }
-
-            Method method = ownerClass.getMethod("getMobileDataEnabled", argsClass);
-
-            Boolean isOpen = (Boolean) method.invoke(mConnectivityManager, arg);
-
-            return isOpen;
-
-        } catch (Exception e) {
-            // TODO: handle exception
-
-            System.out.println("Error");
-            return false;
-        }
-    }
     @Override
     public void onResume() {
         final LocationManager locationManager = (LocationManager) getActivity()
