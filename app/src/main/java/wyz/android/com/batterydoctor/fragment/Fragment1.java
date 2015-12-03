@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ResolveInfo;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +47,7 @@ import at.grabner.circleprogress.TextMode;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import wyz.android.com.batterydoctor.R;
+import wyz.android.com.batterydoctor.service.BrightnessTools;
 
 /**
  * Created by wangyuzhe on 11/15/15.
@@ -72,6 +75,8 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     ImageView imgBtGps;
     @Bind(R.id.graph)
     GraphView graph;
+    @Bind(R.id.battery_bt)
+    Button battery_bt;
     private List<DataPoint> mList = new ArrayList<>();
     LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     private BatteryBroadcastReceiver batteryBroadcastReceiver;
@@ -79,6 +84,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String statusString;
     private String BatteryStatus;
+    private int num = 0;
 
 
     @Override
@@ -134,7 +140,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
             @Override
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
-                    return super.formatLabel(value, isValueX) + ":00";
+                    return super.formatLabel(value, isValueX);
                 } else {
                     return super.formatLabel(value, isValueX) + "%";
                 }
@@ -154,10 +160,8 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         imgBtBluetooth.setOnClickListener(this);
         imgBtGps.setOnClickListener(this);
         imgBtNetwork.setOnClickListener(this);
+        battery_bt.setOnClickListener(this);
 
-        mCircleView.setUnit("%");
-        mCircleView.setUnitColor(mCircleView.getTextColor());
-        mCircleView.setShowUnit(true);
         mCircleView.setOnTouchListener(null);
         mCircleView.setBarColor(getResources().getColor(R.color.beginColor), getResources().getColor(R.color.centerColor), getResources().getColor(R.color.endColor));
         mCircleView.setTextMode(TextMode.PERCENT);
@@ -211,17 +215,65 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
                 //Toast.makeText(getActivity(),"Gps",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.img_bt_network:
-                if(!getMobileDataState(getActivity(),null)){
-                    setMobileData(getActivity(), true);
-                    imgBtNetwork.setImageResource(R.mipmap.net);
-                    Toast.makeText(getActivity(),"Start Network",Toast.LENGTH_SHORT).show();
-                }else {
-                    setMobileData(getActivity(), false);
-                    imgBtNetwork.setImageResource(R.mipmap.netoff);
-                    Toast.makeText(getActivity(),"Close Network",Toast.LENGTH_SHORT).show();
+                if(num == 4)
+                {
+                    num = 0;
                 }
+                switch (num)
+                {
+                    case 0:
+                        BrightnessTools.startAutoBrightness(getActivity());
+                        imgBtNetwork.setImageResource(R.mipmap.auto);
+                        break;
+                    case 1:
+                        BrightnessTools.stopAutoBrightness(getActivity());
+                        BrightnessTools.setBrightness(getActivity(), 10);
+                        BrightnessTools.saveBrightness(getActivity().getContentResolver(),26);
+                        imgBtNetwork.setImageResource(R.mipmap.bt);
+                        break;
+                    case 2:
+                        BrightnessTools.stopAutoBrightness(getActivity());
+                        BrightnessTools.setBrightness(getActivity(), 50);
+                        BrightnessTools.saveBrightness(getActivity().getContentResolver(),128);
+                        imgBtNetwork.setImageResource(R.mipmap.bt50);
+                        break;
+                    case 3:
+                        BrightnessTools.stopAutoBrightness(getActivity());
+                        BrightnessTools.setBrightness(getActivity(), 100);
+                        BrightnessTools.saveBrightness(getActivity().getContentResolver(), 255);
+                        imgBtNetwork.setImageResource(R.mipmap.bt100);
+                        break;
+                }
+                Log.e("bright", String.valueOf(BrightnessTools.getScreenBrightness(getActivity())));
+                num++;
+//                if(!getMobileDataState(getActivity(),null)){
+//                    setMobileData(getActivity(), true);
+//                    imgBtNetwork.setImageResource(R.mipmap.net);
+//                    Toast.makeText(getActivity(),"Start Network",Toast.LENGTH_SHORT).show();
+//                }else {
+//                    setMobileData(getActivity(), false);
+//                    imgBtNetwork.setImageResource(R.mipmap.netoff);
+//                    Toast.makeText(getActivity(),"Close Network",Toast.LENGTH_SHORT).show();
+//                }
                 //Toast.makeText(getActivity(),"Net",Toast.LENGTH_SHORT).show();
+//                if(num == 0)
+//                {
+//                    BrightnessTools.startAutoBrightness(getActivity());
+//                }
+//                if(BrightnessTools.isAutoBrightness(getActivity().getContentResolver()))
+//                {
+//                    BrightnessTools.stopAutoBrightness(getActivity());
+//                }
+//                BrightnessTools.setBrightness(getActivity(),10);
+//                BrightnessTools.saveBrightness(getActivity().getContentResolver(),10);
                 break;
+            case R.id.battery_bt:
+                Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+                ResolveInfo resolveInfo = getActivity().getPackageManager().resolveActivity(intent,0);
+                if(resolveInfo != null)
+                {
+                    startActivity(intent);
+                }
         }
     }
 
@@ -268,13 +320,16 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public void setPower(int currentPower) {
         Time time = new Time();
         time.setToNow();
-        DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
-        Log.e("x", String.valueOf(dataPoint.getX()));
-        Log.e("y", String.valueOf(dataPoint.getY()));
-        mList.add(dataPoint);
-        DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
-        series.resetData(mArrayPoint);
-        graph.addSeries(series);
+        if(time.minute % 5 == 0)
+        {
+            DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, currentPower);
+            Log.e("x", String.valueOf(dataPoint.getX()));
+            Log.e("y", String.valueOf(dataPoint.getY()));
+            mList.add(dataPoint);
+            DataPoint[] mArrayPoint = mList.toArray(new DataPoint[mList.size()]);
+            series.resetData(mArrayPoint);
+            graph.addSeries(series);
+        }
     }
 
     public void setStatus(int status) {
@@ -479,11 +534,31 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         }
 
         //check network
-        if(!getMobileDataState(getActivity(), null)){
-            imgBtNetwork.setImageResource(R.mipmap.netoff);
-        }else {
-            imgBtNetwork.setImageResource(R.mipmap.net);
+        int bright = BrightnessTools.getScreenBrightness(getActivity()) * 100 /255;
+        if(BrightnessTools.isAutoBrightness(getActivity().getContentResolver()))
+        {
+            imgBtNetwork.setImageResource(R.mipmap.auto);
+            num = 1;
         }
+        else {
+            if (bright < 50 )
+            {
+                imgBtNetwork.setImageResource(R.mipmap.bt);
+                num = 2;
+            }
+            else if(bright >= 50 && bright < 100 )
+            {
+                imgBtNetwork.setImageResource(R.mipmap.bt50);
+                num = 3;
+            }
+            else
+            {
+                imgBtNetwork.setImageResource(R.mipmap.bt100);
+                num = 4;
+            }
+        }
+
+        Log.e("bright", String.valueOf(BrightnessTools.getScreenBrightness(getActivity())));
     }
 
     public void charginMethod(int plugged)

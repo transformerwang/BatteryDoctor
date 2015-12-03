@@ -16,6 +16,7 @@
             android:layout_height="300dp"
             android:layout_width="match_parent"
             android:id="@+id/graph"
+            android:layout_marginRight="10dp"
             />
     </LinearLayout>
 </ScrollView>

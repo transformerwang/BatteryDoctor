@@ -69,7 +69,6 @@ public class MyAdapter extends BaseAdapter {
         res = resInfo.get(position);
         holder.appIcon.setImageDrawable(res.loadIcon(mPackageManager));
         holder.tvAppLabel.setText(res.loadLabel(mPackageManager).toString());
-        holder.tvPkgName.setText(res.activityInfo.packageName + '\n' + res.activityInfo.name);
         return convertView;
     }
 
@@ -77,14 +76,10 @@ public class MyAdapter extends BaseAdapter {
     class ViewHolder {
         ImageView appIcon;
         TextView tvAppLabel;
-        TextView tvPkgName;
-        TextView status;
 
         public ViewHolder(View view) {
             this.appIcon = (ImageView) view.findViewById(R.id.img);
             this.tvAppLabel = (TextView) view.findViewById(R.id.name);
-            this.tvPkgName = (TextView) view.findViewById(R.id.desc);
-            this.status = (TextView) view.findViewById(R.id.status);
         }
     }
 }

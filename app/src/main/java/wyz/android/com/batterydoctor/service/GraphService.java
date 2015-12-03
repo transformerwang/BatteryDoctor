@@ -49,23 +49,21 @@ public class GraphService extends Service {
                 notification(df.format(temp * 0.1), mCurrentPower, setStatus(status), charginMethod(plugged));
                 Time time = new Time();
                 time.setToNow();
-//                if(time.minute % 5 ==0)
-//                {
-                    DataPoint dataPoint = new DataPoint((double)time.hour + (double)time.minute/100,mCurrentPower);
-                    Log.e("xs",String.valueOf(dataPoint.getX()));
+                if(time.minute % 5 ==0) {
+                    DataPoint dataPoint = new DataPoint((double) time.hour + (double) time.minute / 100, mCurrentPower);
+                    Log.e("xs", String.valueOf(dataPoint.getX()));
                     Log.e("ys", String.valueOf(dataPoint.getY()));
-                try {
-                    FileOutputStream fos = openFileOutput("DataList4.txt", MODE_APPEND);
-                    OutputStreamWriter osw = new OutputStreamWriter(fos,"UTF-8");
-                    BufferedWriter bw = new BufferedWriter(osw);
-                    bw.write(String.valueOf(dataPoint.getX()) + "," + String.valueOf(dataPoint.getY()) + "\t\n");
-                    bw.close();
-                    osw.close();
-                    fos.close();
+                    try {
+                        FileOutputStream fos = openFileOutput("DataList4.txt", MODE_APPEND);
+                        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+                        BufferedWriter bw = new BufferedWriter(osw);
+                        bw.write(String.valueOf(dataPoint.getX()) + "," + String.valueOf(dataPoint.getY()) + "\t\n");
+                        bw.close();
+                        osw.close();
+                        fos.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
 
 //                Double current = (double) time.hour + (double) time.minute;
 //                if(mList.size() > 0 && current < mList.get(mList.size()-1).getX())
@@ -75,6 +73,7 @@ public class GraphService extends Service {
 //                        file.delete();
 //                    }
 //                }
+                }
 
             }
         }
